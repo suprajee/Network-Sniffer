@@ -1,5 +1,7 @@
 # Network-Sniffer
 ## For Windows Users
+- Download npcap-1.81.exe
+- Run the installer and follow its instructions to install npcap-1.81.exe
 - Download Final.zip
 - Unzip Final.zip to a known location
 - Open the unzipped folder
