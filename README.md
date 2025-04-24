@@ -12,17 +12,6 @@ A powerful and user-friendly network packet sniffer built with Qt and Npcap, pro
 - Disk space monitoring
 - Capture constraints (max packets/bytes)
 
-## Requirements
-
-- Windows operating system
-- CMake (version 3.16 or higher)
-- Qt 5 or Qt 6 with the following components:
-  - Core
-  - Gui
-  - Widgets
-  - Charts
-- Npcap SDK (installed at C:/npcap-sdk/)
-- Visual Studio or compatible C++ compiler
 ## Installation
 ## For Windows Users
 - Download npcap-1.81.exe
