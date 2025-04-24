@@ -1,5 +1,5 @@
-C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/EWIEGA46WW/moc_mainwindow.cpp: C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/mainwindow.h \
-  C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/moc_predefs.h \
+C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/Source\ Code/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/EWIEGA46WW/moc_mainwindow.cpp: C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/Source\ Code/mainwindow.h \
+  C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/Source\ Code/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/moc_predefs.h \
   C:/Qt/6.8.3/mingw_64/include/QtCharts/QAbstractAxis \
   C:/Qt/6.8.3/mingw_64/include/QtCharts/QAbstractBarSeries \
   C:/Qt/6.8.3/mingw_64/include/QtCharts/QAbstractSeries \
@@ -770,7 +770,7 @@ C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/build/Desktop_Qt_6
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/ws2tcpip.h \
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wtypes.h \
   C:/Qt/Tools/mingw1310_64/x86_64-w64-mingw32/include/wtypesbase.h \
-  C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/packetsniffer.h \
+  C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/Source\ Code/packetsniffer.h \
   C:/npcap-sdk/Include/pcap.h \
   C:/npcap-sdk/Include/pcap/bpf.h \
   C:/npcap-sdk/Include/pcap/compiler-tests.h \

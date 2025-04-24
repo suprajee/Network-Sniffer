@@ -1,4 +1,3 @@
-// Updated packetsniffer.cpp
 #include "packetsniffer.h"
 #include <QDebug>
 #include <winsock2.h>
@@ -8,8 +7,6 @@
 #pragma comment(lib, "IPHLPAPI.lib")
 
 PacketSniffer::PacketSniffer(QObject *parent) : QThread(parent), handle(nullptr), capturing(false) {}
-
-// In packetsniffer.cpp - Modify the getAllDevices function to add friendly names
 
 QList<NetworkInterface> PacketSniffer::getAllDevices() {
     QList<NetworkInterface> deviceList;
@@ -26,22 +23,17 @@ QList<NetworkInterface> PacketSniffer::getAllDevices() {
         NetworkInterface iface;
         iface.name = QString(d->name);
 
-        // Add friendly device name if available
         if (d->description != nullptr && strlen(d->description) > 0) {
             iface.friendlyName = QString(d->description);
         } else {
-            // Try to create a more user-friendly name from the device name
             QString simpleName = iface.name;
-            // Remove common prefixes like \Device\NPF_ on Windows
             simpleName = simpleName.replace("\\Device\\NPF_", "");
-            // Convert to more readable format
             if (simpleName.contains("{")) {
                 simpleName = "Network Adapter " + simpleName.left(8);
             }
             iface.friendlyName = simpleName;
         }
 
-        // Get IP Address (same as before)
         iface.ipAddress = "";
         for (pcap_addr_t *a = d->addresses; a; a = a->next) {
             if (a->addr && a->addr->sa_family == AF_INET) {
@@ -51,7 +43,6 @@ QList<NetworkInterface> PacketSniffer::getAllDevices() {
             }
         }
 
-        // Get MAC Address (same as before)
         iface.macAddress = "";
         IP_ADAPTER_INFO AdapterInfo[16];
         DWORD dwBufLen = sizeof(AdapterInfo);
@@ -80,7 +71,6 @@ QList<NetworkInterface> PacketSniffer::getAllDevices() {
     pcap_freealldevs(alldevs);
     return deviceList;
 }
-// In packetsniffer.cpp - Replace the findBestDevice function with this improved version:
 
 QString PacketSniffer::findBestDevice() {
     QList<NetworkInterface> devices = getAllDevices();
@@ -97,7 +87,7 @@ QString PacketSniffer::findBestDevice() {
         int packetCount;
         bool hasIP;
         bool isEthernet;
-        double score;  // Combined score for ranking
+        double score;
     };
     QList<DeviceScore> deviceScores;
 
@@ -112,7 +102,6 @@ QString PacketSniffer::findBestDevice() {
         ds.packetCount = 0;
         ds.hasIP = !iface.ipAddress.isEmpty();
 
-        // Consider device as Ethernet if it has a MAC address and doesn't have specific keywords
         QString lowerName = iface.name.toLower();
         ds.isEthernet = !iface.macAddress.isEmpty() &&
                         !lowerName.contains("loopback") &&
@@ -123,29 +112,24 @@ QString PacketSniffer::findBestDevice() {
         deviceScores.append(ds);
     }
 
-    // Test each device for traffic
     for (int i = 0; i < deviceScores.size(); i++) {
         const QString &deviceName = deviceScores[i].name;
         qDebug() << "Testing device:" << deviceName << "/" << deviceScores[i].friendlyName;
 
-        // Open device for capture
         pcap_t *test_handle = pcap_open_live(deviceName.toStdString().c_str(), BUFSIZ, 1, 100, errbuf);
         if (!test_handle) {
             qDebug() << "  Couldn't open device for testing:" << errbuf;
             continue;
         }
 
-        // Set to non-blocking mode
         if (pcap_setnonblock(test_handle, 1, errbuf) == -1) {
             qDebug() << "  Failed to set non-blocking mode:" << errbuf;
             pcap_close(test_handle);
             continue;
         }
 
-        // Use a specific counter for each device
         int packetCount = 0;
 
-        // Local callback using a reference to our counter
         auto packetCounter = [](u_char *user, const struct pcap_pkthdr *, const u_char *) {
             int *count = reinterpret_cast<int*>(user);
             (*count)++;
@@ -154,13 +138,11 @@ QString PacketSniffer::findBestDevice() {
         // Sample for 2 seconds
         QElapsedTimer timer;
         timer.start();
-        int sampleTimeMs = 2000;  // 2 seconds
+        int sampleTimeMs = 2000;
 
         qDebug() << "  Sampling traffic for" << sampleTimeMs << "ms...";
 
-        // Process packets in smaller batches with longer total duration
         while (timer.elapsed() < sampleTimeMs) {
-            // Read up to 100 packets at a time
             int processed = pcap_dispatch(test_handle, 100, packetCounter, reinterpret_cast<u_char*>(&packetCount));
 
             if (processed < 0) {
@@ -168,7 +150,6 @@ QString PacketSniffer::findBestDevice() {
                 break;
             }
 
-            // Brief pause to not hog CPU but still capture most packets
             QThread::msleep(10);
         }
 
@@ -177,23 +158,14 @@ QString PacketSniffer::findBestDevice() {
         deviceScores[i].packetCount = packetCount;
         qDebug() << "  Device:" << deviceName << "packets:" << packetCount;
     }
-
-    // Calculate scores for each device
     for (auto &device : deviceScores) {
-        // Base score from packet count
         device.score = device.packetCount;
-
-        // Bonus for having IP address
         if (device.hasIP) {
             device.score += 10;
         }
-
-        // Bonus for being a physical Ethernet device
         if (device.isEthernet) {
             device.score += 20;
         }
-
-        // Penalty for specific device types we want to avoid
         QString lowerName = device.name.toLower();
         if (lowerName.contains("loopback") ||
             lowerName.contains("virtual") ||
@@ -205,14 +177,10 @@ QString PacketSniffer::findBestDevice() {
 
         qDebug() << "Device score:" << device.name << "=" << device.score;
     }
-
-    // Sort devices by score
     std::sort(deviceScores.begin(), deviceScores.end(),
               [](const DeviceScore &a, const DeviceScore &b) {
                   return a.score > b.score;
               });
-
-    // Get best device
     if (!deviceScores.isEmpty() && deviceScores.first().score > 0) {
         QString bestDevice = deviceScores.first().name;
         qDebug() << "Best device selected:" << bestDevice
@@ -220,8 +188,6 @@ QString PacketSniffer::findBestDevice() {
                  << "with score:" << deviceScores.first().score;
         return bestDevice;
     }
-
-    // Fallback to first device with IP address
     for (const auto &device : deviceScores) {
         if (device.hasIP) {
             qDebug() << "No good device found, falling back to device with IP:" << device.name;
@@ -229,7 +195,6 @@ QString PacketSniffer::findBestDevice() {
         }
     }
 
-    // Last resort: return first device
     if (!deviceScores.isEmpty()) {
         qDebug() << "No suitable device found, falling back to first device:" << deviceScores.first().name;
         return deviceScores.first().name;
@@ -285,7 +250,6 @@ void PacketSniffer::setDeviceName(const QString &deviceName) {
 void PacketSniffer::packetHandler(u_char *userData, const struct pcap_pkthdr *pkthdr, const u_char *packet) {
     PacketSniffer *sniffer = reinterpret_cast<PacketSniffer*>(userData);
 
-    // Store raw packet data
     CapturedPacket capturedPacket;
     capturedPacket.header = *pkthdr;
     capturedPacket.data.assign(packet, packet + pkthdr->len);
@@ -360,7 +324,7 @@ void PacketSniffer::packetHandler(u_char *userData, const struct pcap_pkthdr *pk
             bool isSyn = (tcpHeader->flags & 0x02);
             bool isRst = (tcpHeader->flags & 0x04);
 
-            // TLS Detection
+            // TLS
             if ((destPort == 443 || srcPort == 443) && pkthdr->len > 54) {
                 const u_char *tlsPayload = packet + sizeof(struct ether_header) + (ipHeader->header_length * 4) + (tcpHeader->offset_reserved >> 4) * 4;
                 u_char tlsContentType = tlsPayload[0];

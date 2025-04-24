@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/HP/OneDrive - iitr.ac.in/Documents/newersniffer/nn
+# Install script for directory: C:/Users/HP/OneDrive - iitr.ac.in/Documents/newersniffer/Source Code
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,7 @@ if(NOT DEFINED CMAKE_OBJDUMP)
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "C:/Users/HP/OneDrive - iitr.ac.in/Documents/newersniffer/nn/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif.exe")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin" TYPE EXECUTABLE FILES "C:/Users/HP/OneDrive - iitr.ac.in/Documents/newersniffer/Source Code/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif.exe")
   if(EXISTS "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/Netsnif.exe" AND
      NOT IS_SYMLINK "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/Netsnif.exe")
     if(CMAKE_INSTALL_DO_STRIP)
@@ -62,6 +62,6 @@ endif()
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-  file(WRITE "C:/Users/HP/OneDrive - iitr.ac.in/Documents/newersniffer/nn/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "C:/Users/HP/OneDrive - iitr.ac.in/Documents/newersniffer/Source Code/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

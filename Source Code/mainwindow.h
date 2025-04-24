@@ -50,7 +50,6 @@ public slots:
     void onProtocolFilterChanged();
     void onCaptureStarted(QString deviceName);
     void onCaptureError(QString errorMessage);
-    void onAutoStartChanged(int state);
 
 
 private:
@@ -105,11 +104,10 @@ private slots:
     void updateDiskInformation(const QString &path);
     void onSaveButtonClicked();
     void updateSaveButtonState();
-    void savePacketsToFile(const QString &filePath);
     void onAddIpFilterClicked();
     void onRemoveIpFilterClicked();
     void onFixedIpFilterChanged();
     void onPacketSelected();
 };
 
-#endif // MAINWINDOW_H
+#endif

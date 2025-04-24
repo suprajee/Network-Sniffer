@@ -29,14 +29,13 @@ MainWindow::MainWindow(QWidget *parent)
         connect(ui->deviceComboBox, QOverload<int>::of(&QComboBox::currentIndexChanged),
                 this, &MainWindow::onDeviceSelected);
         setupCaptureConstraints();
-        // Setup chart
         hexDumpView = new QTextEdit(this);
         hexDumpView->setFont(QFont("Courier New", 10));
         hexDumpView->setReadOnly(true);
         ui->hexDumpLayout->addWidget(hexDumpView);
         updateTimer = new QTimer(this);
         updateTimer->setSingleShot(true);
-        updateTimer->setInterval(100); // 100ms delay
+        updateTimer->setInterval(100);
 
         connect(updateTimer, &QTimer::timeout, this, &MainWindow::updateDelayedHexDump);
         trafficChart->addSeries(packetSeries);
@@ -53,10 +52,8 @@ MainWindow::MainWindow(QWidget *parent)
         trafficChart->addAxis(axisY, Qt::AlignLeft);
         packetSeries->attachAxis(axisX);
         packetSeries->attachAxis(axisY);
-
-        // IMPORTANT: Make sure this widget is promoted to QChartView
         ui->trafficChartView->setChart(trafficChart);
-    // Populate device list
+
     populateDeviceList();
 
     // Connect signals and slots
@@ -73,7 +70,6 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->addIpButton, &QPushButton::clicked, this, &MainWindow::onAddIpFilterClicked);
     connect(ui->removeIpButton, &QPushButton::clicked, this, &MainWindow::onRemoveIpFilterClicked);
     connect(ui->browseButton, &QPushButton::clicked, this, &MainWindow::onBrowseButtonClicked);
-    // Start/Stop toggle
     ui->startButton->setCheckable(true);
     connect(ui->packetTable, &QTableWidget::itemSelectionChanged,this, &MainWindow::onPacketSelected);
     connect(ui->startButton, &QPushButton::clicked, this, &MainWindow::toggleCapture);
@@ -88,7 +84,6 @@ MainWindow::MainWindow(QWidget *parent)
             }
         }
     });
-    // Style
     ui->startButton->setStyleSheet(
         "QPushButton { background-color: #28a745; color: white; font-size: 16px; font-weight: bold; padding: 10px; border-radius: 8px; border: 2px solid #218838; }"
         "QPushButton:hover { background-color: #218838; }"
@@ -98,7 +93,6 @@ MainWindow::MainWindow(QWidget *parent)
         "QPushButton:checked:pressed { background-color: #bd2130; }"
         );
 
-    // Table stretch
     ui->packetTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
     // Auto-select best device
@@ -127,7 +121,6 @@ MainWindow::~MainWindow() {
     delete ui;
 }
 
-// In mainwindow.cpp - Update the populateDeviceList function
 
 void MainWindow::populateDeviceList() {
     ui->deviceComboBox->clear();
@@ -136,7 +129,6 @@ void MainWindow::populateDeviceList() {
 
     QList<NetworkInterface> devices = PacketSniffer::getAllDevices();
     for (const auto& device : devices) {
-        // Use both friendly name and technical details
         QString displayText;
 
         displayText = device.friendlyName;
@@ -214,10 +206,6 @@ void MainWindow::onCaptureError(QString errorMessage) {
 
 }
 
-void MainWindow::onAutoStartChanged(int state) {
-    QSettings settings;
-    settings.setValue("autoStart", state == Qt::Checked);
-}
 void MainWindow::onProtocolFilterChanged() {
     QStringList allowed = getSelectedProtocols();
 
@@ -248,7 +236,7 @@ void MainWindow::onAddIpFilterClicked() {
         .arg(ui->ipOctet3->text())
         .arg(ui->ipOctet4->text());
 
-    if (ip.contains("..") || ip.contains("..")) {
+    if (ip.contains("..") || ip.contains("..")||ip[0]=='.'||ip[ip.size()-1]=='.') {
         QMessageBox::warning(this, "Invalid IP", "Please enter all four octets.");
         return;
     }
@@ -290,12 +278,12 @@ bool matchesIPFilter(const QString &srcIP, const QString &destIP, const QList<IP
     return false;
 }
 void MainWindow::onFixedIpFilterChanged() {
-    onProtocolFilterChanged(); // This re-applies protocol + IP filtering
+    onProtocolFilterChanged();
 }
 void MainWindow::updatePacketTable(QString srcMac, QString destMac, QString srcIP, QString destIP, QString protocol, int length, QString info) {
     QStringList allowedProtocols = getSelectedProtocols();
     if (!allowedProtocols.contains(protocol)) {
-        return; // Skip this one
+        return;
     }
     if (!matchesIPFilter(srcIP, destIP, ipFilterList)) return;
     int row = ui->packetTable->rowCount();
@@ -319,7 +307,6 @@ void MainWindow::updatePacketTable(QString srcMac, QString destMac, QString srcI
     onProtocolFilterChanged();
     ui->packetTable->scrollToBottom();
 
-    // Update protocol counts
     protocolCounts[protocol]++;
     totalPackets++;
     packetsThisSecond++;
@@ -419,58 +406,18 @@ void MainWindow::updateDiskInformation(const QString &path) {
     qint64 availableBytes = storage.bytesAvailable();
     qint64 usedBytes = totalBytes - availableBytes;
 
-    // Convert to more readable format (GB)
     double totalGB = totalBytes / (1024.0 * 1024.0 * 1024.0);
     double availableGB = availableBytes / (1024.0 * 1024.0 * 1024.0);
     double usedGB = usedBytes / (1024.0 * 1024.0 * 1024.0);
 
-    // Calculate usage percentage
     int usagePercentage = (int)(100.0 * usedBytes / totalBytes);
 
-    // Update UI elements
     ui->diskCapacityLineEdit->setText(QString("%1 GB").arg(totalGB, 0, 'f', 2));
     ui->diskSpaceLineEdit->setText(QString("%1 GB Available").arg(availableGB, 0, 'f', 2));
     ui->diskUsageLineEdit->setText(QString("%1 GB Used (%2%)").arg(usedGB, 0, 'f', 2).arg(usagePercentage));
 }
 
-void MainWindow::savePacketsToFile(const QString &filePath) {
-    QFile file(filePath);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error",
-                              QString("Could not open file for writing: %1").arg(file.errorString()));
-        return;
-    }
 
-    QTextStream out(&file);
-
-    // Write header
-    out << "Source MAC,Destination MAC,Source IP,Destination IP,Protocol,Length,Info\n";
-
-    // Write each packet from the table
-    int rowCount = ui->packetTable->rowCount();
-    for (int i = 0; i < rowCount; i++) {
-        QStringList rowData;
-        for (int j = 0; j < 7; j++) {  // 7 columns in the packet table
-            QTableWidgetItem* item = ui->packetTable->item(i, j);
-            if (item) {
-                // CSV escaping - wrap in quotes and escape internal quotes
-                QString value = item->text();
-                if (value.contains(',') || value.contains('"') || value.contains('\n')) {
-                    value.replace("\"", "\"\"");  // Escape quotes with double quotes
-                    value = "\"" + value + "\"";  // Wrap in quotes
-                }
-                rowData << value;
-            } else {
-                rowData << "";
-            }
-        }
-        out << rowData.join(",") << "\n";
-    }
-
-    file.close();
-
-    statusBar()->showMessage(QString("Saved %1 packets to %2").arg(rowCount).arg(filePath), 5000);
-}
 QString MainWindow::formatHexByte(u_char byte) {
     return QString("%1").arg(byte, 2, 16, QChar('0')).toUpper();
 }
@@ -485,40 +432,26 @@ QString MainWindow::formatAsciiChar(u_char byte) {
 QString MainWindow::createHexDump(const u_char *packet, int length) {
     QString output;
     const int BYTES_PER_LINE = 16;
-
     for (int offset = 0; offset < length; offset += BYTES_PER_LINE) {
-        // Offset
         output += QString("%1  ").arg(offset, 4, 16, QChar('0')).toUpper();
 
         QString hexPart;
         QString asciiPart;
-
-        // Process each byte in the line
         for (int i = 0; i < BYTES_PER_LINE; i++) {
             if (offset + i < length) {
                 u_char byte = packet[offset + i];
-
-                // Add hex representation
                 hexPart += formatHexByte(byte) + " ";
-
-                // Add ASCII representation
                 asciiPart += formatAsciiChar(byte);
-
-                // Add extra space after 8 bytes
                 if (i == 7) {
                     hexPart += " ";
                 }
             } else {
-                // Fill with spaces if we're at the end
                 hexPart += "   ";
                 asciiPart += " ";
             }
         }
-
-        // Combine hex and ASCII parts
         output += hexPart + "  " + asciiPart + "\n";
     }
-
     return output;
 }
 
@@ -541,7 +474,6 @@ void MainWindow::onPacketSelected() {
 
     selectedRow = selectedItems.first()->row();
     hexDumpView->setText("Loading packet data...");
-    // Instead of updating immediately, start the timer
     updateTimer->start();
 }
 void MainWindow::updateDelayedHexDump() {
@@ -561,7 +493,6 @@ void MainWindow::updateDelayedHexDump() {
 }
 
 void MainWindow::updateSaveButtonState() {
-    // Only enable save button when not capturing
     ui->saveButton->setEnabled(!sniffer->isRunning());
 }
 void MainWindow::updateGraph() {
@@ -591,7 +522,6 @@ void MainWindow::onSaveButtonClicked() {
                              "Please stop the packet capture before saving data.");
         return;
     }
-
     QString savePath = ui->savingPathLineEdit->text();
     if (savePath.isEmpty()) {
         savePath = QDir::homePath();
@@ -621,7 +551,6 @@ void MainWindow::onSaveButtonClicked() {
         savePacketsToPCAP(pcapFilePath);
     }
 
-    // Remember last export path
     if (!csvFilePath.isEmpty() || !pcapFilePath.isEmpty()) {
         lastExportPath = QFileInfo(csvFilePath.isEmpty() ? pcapFilePath : csvFilePath).absolutePath();
         ui->savingPathLineEdit->setText(lastExportPath);
@@ -629,7 +558,6 @@ void MainWindow::onSaveButtonClicked() {
     }
 }
 
-// Rename the existing savePacketsToFile to savePacketsToCSV:
 void MainWindow::savePacketsToCSV(const QString &filePath) {
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -640,10 +568,7 @@ void MainWindow::savePacketsToCSV(const QString &filePath) {
 
     QTextStream out(&file);
 
-    // Write header
     out << "Source MAC,Destination MAC,Source IP,Destination IP,Protocol,Length,Info\n";
-
-    // Write each packet from the table
     int rowCount = ui->packetTable->rowCount();
     for (int i = 0; i < rowCount; i++) {
         QStringList rowData;
@@ -667,7 +592,6 @@ void MainWindow::savePacketsToCSV(const QString &filePath) {
     statusBar()->showMessage(QString("Saved %1 packets to CSV: %2").arg(rowCount).arg(filePath), 5000);
 }
 
-// Add new function to save as PCAP:
 void MainWindow::savePacketsToPCAP(const QString &filePath) {
     pcap_t *pd;
     pcap_dumper_t *pdumper;
@@ -709,10 +633,10 @@ void MainWindow::setupCaptureConstraints(){
         maxBytes = value*1024*1024;
             });
 
-    // Initialize limits
     maxPackets = ui->packetLimitSpinBox->value();
     maxBytes = (ui->byteLimitSpinBox->value())*1024*1024;
 }
+
 void MainWindow::checkCaptureConstraints(int packetSize) {
     capturedPacketsCount++;
     capturedBytesCount += packetSize;
@@ -735,26 +659,21 @@ void MainWindow::checkCaptureConstraints(int packetSize) {
     if (shouldStop && sniffer->isRunning()) {
         qDebug() << "Auto-stopping capture:" << stopReason;
 
-        // Use direct connections instead of lambda with invokeMethod
         QTimer::singleShot(0, this, [this, stopReason]() {
-            // Make sure we're stopping the capture properly
             if (sniffer->isRunning()) {
                 stopCapture();
             }
 
-            // Update UI safely
+            // Update UI
             ui->startButton->setChecked(false);
             ui->startButton->setText("Start");
             statusBar()->showMessage("Capture stopped: " + stopReason);
             graphTimer->stop();
             ui->saveButton->setEnabled(true);
 
-            // Show message box
             QMessageBox::information(this, "Capture Complete",
                                      "Packet capture stopped: " + stopReason);
         });
-
-        // Set a flag to prevent multiple stops
         maxPackets = 0;
         maxBytes = 0;
     }

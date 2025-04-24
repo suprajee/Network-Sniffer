@@ -1,5 +1,5 @@
-C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/EWIEGA46WW/moc_packetsniffer.cpp: C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/packetsniffer.h \
-  C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/nn/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/moc_predefs.h \
+C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/Source\ Code/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/EWIEGA46WW/moc_packetsniffer.cpp: C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/Source\ Code/packetsniffer.h \
+  C:/Users/HP/OneDrive\ -\ iitr.ac.in/Documents/newersniffer/Source\ Code/build/Desktop_Qt_6_9_0_MinGW_64_bit-Debug/Netsnif_autogen/moc_predefs.h \
   C:/Qt/6.8.3/mingw_64/include/QtCore/QList \
   C:/Qt/6.8.3/mingw_64/include/QtCore/QObject \
   C:/Qt/6.8.3/mingw_64/include/QtCore/QString \
