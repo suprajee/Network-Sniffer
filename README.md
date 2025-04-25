@@ -26,7 +26,7 @@ A powerful and user-friendly network packet sniffer built with Qt and Npcap, pro
   ```
   chmod +x Final.AppImage
   sudo ./Final.AppImage
-
+  ```
 ## Usage
 
 1. Launch the application
@@ -64,3 +64,4 @@ A powerful and user-friendly network packet sniffer built with Qt and Npcap, pro
 - Disk space monitoring for export locations
   ```
   Then enter your password.
+  ```
