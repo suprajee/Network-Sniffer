@@ -4,7 +4,7 @@ A powerful and user-friendly network packet sniffer built with Qt and Npcap, pro
 
 - Real-time packet capture and analysis
 - Support for multiple network interfaces
-- Protocol filtering (TCP, UDP, ICMP, etc.)
+- Protocol filtering (TCP, UDP, etc.)
 - IP address filtering (source/destination)
 - Packet hex dump viewer
 - Real-time traffic visualization with charts
