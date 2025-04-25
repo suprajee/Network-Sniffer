@@ -62,6 +62,3 @@ A powerful and user-friendly network packet sniffer built with Qt and Npcap, pro
 - Save captured packets in CSV format
 - Export in PCAP format for analysis in other tools
 - Disk space monitoring for export locations
-  ```
-  Then enter your password.
-  ```
